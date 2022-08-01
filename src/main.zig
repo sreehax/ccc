@@ -1,10 +1,17 @@
 const std = @import("std");
-const Tokenizer = @import("Tokenizer.zig");
+const t = @import("tokenizer.zig");
 pub fn main() void {
-    const testing = "unsigned char *ptr = 1;";
-    var tok = Tokenizer.init(testing);
+    const testing = \\
+\\unsigned char *testing1234(int argc, char *argv[]) {
+\\    while (argc != 0) {
+\\        puts(argv[argc--]);
+\\    }
+\\    return NULL;
+\\}
+;
+    var tok = t.Tokenizer.init(testing);
     var token = tok.next();
     while (token.tag != .eof) : (token = tok.next()) {
-        std.debug.print("{}: {s}\n", .{token.tag, tok.code[token.pos.start..token.pos.end]});
+        std.debug.print("parsed token [{s}] {s}\n", .{@tagName(token.tag), tok.code[token.pos.start..token.pos.end]});
     }
 }
