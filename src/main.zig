@@ -1,17 +1,17 @@
 const std = @import("std");
-const t = @import("tokenizer.zig");
+const l = @import("lexer.zig");
 pub fn main() void {
-    const testing = \\
-\\unsigned char *testing1234(int argc, char *argv[]) {
-\\    while (argc != 0) {
+    const testing =
+\\int main(int argc, char *argv[]) {
+\\    for (int i=0; i < argc; i++) {
 \\        puts(argv[argc--]);
 \\    }
-\\    return NULL;
+\\    return 0;
 \\}
 ;
-    var tok = t.Tokenizer.init(testing);
-    var token = tok.next();
-    while (token.tag != .eof) : (token = tok.next()) {
-        std.debug.print("parsed token [{s}] {s}\n", .{@tagName(token.tag), tok.code[token.pos.start..token.pos.end]});
+    var lexer = l.Lexer.init(testing);
+    var token = lexer.next();
+    while (token.tag != .eof) : (token = lexer.next()) {
+        std.debug.print("parsed token [{s}] {s}\n", .{@tagName(token.tag), lexer.code[token.pos.start..token.pos.end]});
     }
 }

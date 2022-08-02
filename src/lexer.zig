@@ -1,5 +1,7 @@
 const std = @import("std");
-pub const Tokenizer = struct {
+
+/// this is a doc comment
+pub const Lexer = struct {
     code: [*:0]const u8,
     idx: usize,
 
@@ -97,6 +99,10 @@ pub const Tokenizer = struct {
                     '&' => state = .ampersand,
                     '|' => state = .pipe,
                     '^' => state = .xor,
+                    '0' => {
+                        state = .zero;
+                        ret.tag = .int_literal_oct;
+                    },
                     '1'...'9' => {
                         state = .int_literal;
                         ret.tag = .int_literal;
@@ -301,6 +307,26 @@ pub const Tokenizer = struct {
                         break;
                     },
                     else => break
+                },
+                .zero => switch (c) {
+                    '0'...'7' => {},
+                    'x' => {
+                        state = .hex_number;
+                        ret.tag = .int_literal_hex;
+                    },
+                    '8', '9', 'A'...'Z', 'a'...'w', 'y', 'z' => {
+                        ret.tag = .invalid;
+                        break;
+                    },
+                    else => break
+                },
+                .hex_number => switch (c) {
+                    '0'...'9', 'A'...'F', 'a'...'f' => {},
+                    'G'...'Z', 'g'...'z' => {
+                        ret.tag = .invalid;
+                        break;
+                    },
+                    else => break
                 }
             }
         }
@@ -335,15 +361,19 @@ pub const Tokenizer = struct {
         xor,
         int_literal,
         float_literal,
+        zero,
+        hex_number
     };
 };
 
 pub const Token = struct {
-        tag: Tag,
+        tag: LexTag,
         pos: Pos,
-        pub const Tag = enum {
+        pub const LexTag = enum {
             identifier,        // myvariable
             int_literal,       // 123456
+            int_literal_hex,   // 0xdeadbeef
+            int_literal_oct,   // 0755
             float_literal,     // 3.14
             op_plus,           // +
             op_pluseq,         // +=
@@ -410,7 +440,7 @@ pub const Token = struct {
             start: usize,
             end: usize
         };
-        pub const keywords = std.ComptimeStringMap(Tag, .{
+        pub const keywords = std.ComptimeStringMap(LexTag, .{
             .{"char", .keyword_char},
             .{"const", .keyword_const},
             .{"else", .keyword_else},
