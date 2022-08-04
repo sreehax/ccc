@@ -369,6 +369,10 @@ pub const Lexer = struct {
 pub const Token = struct {
         tag: LexTag,
         pos: Pos,
+        pub const Pos = struct {
+            start: usize,
+            end: usize
+        };
         pub const LexTag = enum {
             identifier,        // myvariable
             int_literal,       // 123456
@@ -435,10 +439,6 @@ pub const Token = struct {
             keyword_while,     // while
             eof,               // EOF
             invalid            // who knows
-        };
-        pub const Pos = struct {
-            start: usize,
-            end: usize
         };
         pub const keywords = std.ComptimeStringMap(LexTag, .{
             .{"char", .keyword_char},
